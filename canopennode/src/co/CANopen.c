@@ -23,7 +23,7 @@
  * limitations under the License.
  */
 
-#include "CANopen.h"
+#include "co/CANopen.h"
 
 /* Get values from CO_config_t or from single default OD.h ********************/
 #if CO_MULTIPLE_OD
@@ -63,7 +63,7 @@
 #elif OD_CNT_HB_CONS < 0 || OD_CNT_HB_CONS > 1
 #error OD_CNT_HB_CONS from OD.h not correct!
 #endif
-#if ((CO_CONFIG_HB_CONS)&CO_CONFIG_HB_CONS_ENABLE) && OD_CNT_HB_CONS == 1
+#if ((CO_CONFIG_HB_CONS) & CO_CONFIG_HB_CONS_ENABLE) && OD_CNT_HB_CONS == 1
 #if OD_CNT_ARR_1016 < 1 || OD_CNT_ARR_1016 > 127
 #error OD_CNT_ARR_1016 is not defined in Object Dictionary or value is wrong!
 #endif

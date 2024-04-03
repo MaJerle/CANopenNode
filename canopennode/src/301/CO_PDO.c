@@ -23,14 +23,13 @@
  * limitations under the License.
  */
 
-#include <string.h>
-
 #include "co/301/CO_PDO.h"
+#include <string.h>
 
 #if (CO_CONFIG_PDO) & (CO_CONFIG_RPDO_ENABLE | CO_CONFIG_TPDO_ENABLE)
 
 #if (CO_CONFIG_PDO) & CO_CONFIG_FLAG_OD_DYNAMIC
-#if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_OD_IO_ACCESS) == 0
+#if ((CO_CONFIG_PDO) & CO_CONFIG_PDO_OD_IO_ACCESS) == 0
 #error Dynamic PDO mapping is not possible without CO_CONFIG_PDO_OD_IO_ACCESS
 #endif
 #endif
@@ -149,7 +148,7 @@ static ODR_t PDOconfigMap(CO_PDO_common_t *PDO,
             PDO->flagPDObyte[mapIndex] = NULL;
         }
     }
-#endif
+#endif /* OD_FLAGS_PDO_SIZE > 0 */
 
     return ODR_OK;
 }
@@ -231,6 +230,7 @@ static CO_ReturnError_t PDO_initMapping(CO_PDO_common_t *PDO,
 }
 
 #if (CO_CONFIG_PDO) & CO_CONFIG_FLAG_OD_DYNAMIC
+
 /*
  * Custom function for writing OD object "PDO mapping parameter"
  *
@@ -302,7 +302,8 @@ static ODR_t OD_write_PDO_mapping(OD_stream_t *stream,
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_PDO_OD_IO_ACCESS */
 
 
-#if ((CO_CONFIG_PDO)&CO_CONFIG_PDO_OD_IO_ACCESS) == 0
+#if ((CO_CONFIG_PDO) & CO_CONFIG_PDO_OD_IO_ACCESS) == 0
+
 static CO_ReturnError_t PDO_initMapping(CO_PDO_common_t *PDO,
                                         OD_t *OD,
                                         OD_entry_t *OD_PDOMapPar,
@@ -928,7 +929,7 @@ void CO_RPDO_process(CO_RPDO_t *RPDO,
 #endif
         }
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_RPDO_TIMERS_ENABLE */
-    }  /* if (PDO->valid && NMTisOperational) */
+    } /* if (PDO->valid && NMTisOperational) */
     else {
         /* not valid and operational, clear CAN receive flags and timeoutTimer*/
 #if (CO_CONFIG_PDO) & CO_CONFIG_PDO_SYNC_ENABLE
@@ -1337,7 +1338,7 @@ static CO_ReturnError_t CO_TPDOsend(CO_TPDO_t *TPDO)
 
 /******************************************************************************/
 void CO_TPDO_process(CO_TPDO_t *TPDO,
-#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_PDO) & CO_CONFIG_TPDO_TIMERS_ENABLE) || defined CO_DOXYGEN
                      uint32_t timeDifference_us,
                      uint32_t *timerNext_us,
 #endif
@@ -1345,7 +1346,7 @@ void CO_TPDO_process(CO_TPDO_t *TPDO,
                      bool_t syncWas)
 {
     CO_PDO_common_t *PDO = &TPDO->PDO_common;
-#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE)
+#if ((CO_CONFIG_PDO) & CO_CONFIG_TPDO_TIMERS_ENABLE)
     (void)timerNext_us;
 #endif
     (void)syncWas;
@@ -1353,7 +1354,7 @@ void CO_TPDO_process(CO_TPDO_t *TPDO,
     if (PDO->valid && NMTisOperational) {
 
         /* check for event timer or application event */
-#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_TIMERS_ENABLE) || (OD_FLAGS_PDO_SIZE > 0)
+#if ((CO_CONFIG_PDO) & CO_CONFIG_TPDO_TIMERS_ENABLE) || (OD_FLAGS_PDO_SIZE > 0)
         if (TPDO->transmissionType == CO_PDO_TRANSM_TYPE_SYNC_ACYCLIC ||
             TPDO->transmissionType >= CO_PDO_TRANSM_TYPE_SYNC_EVENT_LO) {
             /* event timer */
@@ -1454,7 +1455,7 @@ void CO_TPDO_process(CO_TPDO_t *TPDO,
                 } else { /* MISRA C 2004 14.10 */
                 }
             }
-        }      /* else if (TPDO->SYNC && syncWas) */
+        } /* else if (TPDO->SYNC && syncWas) */
         else { /* MISRA C 2004 14.10 */
         }
 #endif

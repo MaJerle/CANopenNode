@@ -22,9 +22,9 @@
  * limitations under the License.
  */
 
-#include "storage/CO_storageEeprom.h"
+#include "co/storage/CO_storageEeprom.h"
 #include "co/301/crc16-ccitt.h"
-#include "storage/CO_eeprom.h"
+#include "co/storage/CO_eeprom.h"
 
 #if (CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE
 

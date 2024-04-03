@@ -25,10 +25,10 @@
 #ifndef CO_OPT_HDR_H
 #define CO_OPT_HDR_H
 
-/* Add user file */
-#if defined(CO_INCLUDE_USER_FILE)
-#include "co_user.h"
-#endif /* defined(CO_INCLUDE_USER_FILE) */
+/* Add user options file */
+#if defined(CO_INCLUDE_USER_OPTS_FILE)
+#include "co_opts.h"
+#endif /* defined(CO_INCLUDE_USER_OPTS_FILE) */
 
 /**
  * @defgroup CO_STACK_CONFIG Stack configuration

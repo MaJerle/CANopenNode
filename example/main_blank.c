@@ -27,10 +27,9 @@
 
 #include <stdio.h>
 
-#include "CANopen.h"
 #include "CO_storageBlank.h"
 #include "OD.h"
-
+#include "co/CANopen.h"
 
 #define log_printf(macropar_message, ...)                                      \
     printf(macropar_message, ##__VA_ARGS__)

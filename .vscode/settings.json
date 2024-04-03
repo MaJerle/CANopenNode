@@ -2,6 +2,11 @@
   "files.associations": {
     "*.lcdjson": "json",
     "co_driver_target.h": "c",
-    "compare": "cpp"
-  }
+    "compare": "cpp",
+    "co_emergency.h": "c",
+    "co_odinterface.h": "c",
+    "co_driver.h": "c",
+    "co_opt.h": "c",
+    "od.h": "c"
+}
 }

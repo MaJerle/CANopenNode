@@ -25,7 +25,7 @@
 #ifndef CO_STORAGE_BLANK_H
 #define CO_STORAGE_BLANK_H
 
-#include "storage/CO_storage.h"
+#include "co/storage/CO_storage.h"
 
 #if ((CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE) || defined CO_DOXYGEN
 
@@ -51,8 +51,7 @@ CO_ReturnError_t CO_storageBlank_init(CO_storage_t *storage,
                                       uint8_t entriesCount,
                                       uint32_t *storageInitError);
 
-uint32_t CO_storageBlank_auto_process(CO_storage_t *storage,
-                                      bool_t closeFiles);
+uint32_t CO_storageBlank_auto_process(CO_storage_t *storage, bool_t closeFiles);
 
 #ifdef __cplusplus
 }

@@ -26,7 +26,7 @@
 #ifndef CO_STORAGE_EEPROM_H
 #define CO_STORAGE_EEPROM_H
 
-#include "storage/CO_storage.h"
+#include "co/storage/CO_storage.h"
 
 #if ((CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE) || defined CO_DOXYGEN
 

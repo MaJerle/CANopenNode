@@ -30,6 +30,14 @@
 
 #ifndef OD_H
 #define OD_H
+
+/* TODO: This is to be added in the auto generator */
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "co/301/CO_ODinterface.h"
+
 /*******************************************************************************
     Counters of OD objects
 *******************************************************************************/
@@ -257,6 +265,7 @@ extern OD_ATTR_RAM OD_RAM_t OD_RAM;
 #ifndef OD_ATTR_OD
 #define OD_ATTR_OD
 #endif
+
 extern OD_ATTR_OD OD_t *OD;
 
 
