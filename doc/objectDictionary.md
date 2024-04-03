@@ -139,7 +139,7 @@ extern OD_t *ODxyz;
 ### Example ODxyz.c file
 ```c
 #define OD_DEFINITION
-#include "301/CO_ODinterface.h"
+#include "co/301/CO_ODinterface.h"
 #include "ODxyz.h"
 
 /* OD data initialization of all groups ***************************************/

@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.lcdjson": "json",
+    "co_driver_target.h": "c",
+    "compare": "cpp"
+  }
+}

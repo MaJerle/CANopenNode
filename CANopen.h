@@ -28,23 +28,24 @@
 #ifndef CANopen_H
 #define CANopen_H
 
-#include "301/CO_driver.h"
-#include "301/CO_ODinterface.h"
-#include "301/CO_NMT_Heartbeat.h"
-#include "301/CO_HBconsumer.h"
-#include "301/CO_Node_Guarding.h"
-#include "301/CO_Emergency.h"
-#include "301/CO_SDOserver.h"
-#include "301/CO_SDOclient.h"
-#include "301/CO_SYNC.h"
-#include "301/CO_PDO.h"
-#include "301/CO_TIME.h"
-#include "303/CO_LEDs.h"
-#include "304/CO_GFC.h"
-#include "304/CO_SRDO.h"
-#include "305/CO_LSSslave.h"
-#include "305/CO_LSSmaster.h"
-#include "309/CO_gateway_ascii.h"
+#include "co/301/CO_Emergency.h"
+#include "co/301/CO_HBconsumer.h"
+#include "co/301/CO_NMT_Heartbeat.h"
+#include "co/301/CO_Node_Guarding.h"
+#include "co/301/CO_ODinterface.h"
+#include "co/301/CO_PDO.h"
+#include "co/301/CO_SDOclient.h"
+#include "co/301/CO_SDOserver.h"
+#include "co/301/CO_SYNC.h"
+#include "co/301/CO_TIME.h"
+#include "co/301/CO_driver.h"
+#include "co/303/CO_LEDs.h"
+#include "co/304/CO_GFC.h"
+#include "co/304/CO_SRDO.h"
+#include "co/305/CO_LSSmaster.h"
+#include "co/305/CO_LSSslave.h"
+#include "co/309/CO_gateway_ascii.h"
+#include "co/co_opt.h"
 #include "extra/CO_trace.h"
 
 
@@ -65,7 +66,7 @@ extern "C" {
  * CANopenNode homepage is https://github.com/CANopenNode/CANopenNode
  *
  * CANopen.h file combines all CANopenNode source files. @ref CO_STACK_CONFIG
- * is first defined in "CO_config.h" file. Number of different CANopenNode
+ * is first defined in "co/co_opt.h" file. Number of different CANopenNode
  * objects used is configured with @ref CO_config_t structure or is read
  * directly from "OD.h" file, if single object dictionary definition is used.
  * "OD.h" and "OD.c" files defines CANopen Object Dictionary and are generated
@@ -168,26 +169,6 @@ extern "C" {
  * @{
  */
 
-/**
- * If macro is defined externally, then configuration with multiple object
- * dictionaries will be possible. If macro is not defined, default "OD.h" file
- * with necessary definitions, such as OD_CNT_xxx, will be used, and also memory
- * consumption and startup time will be lower.
- */
-#ifdef CO_DOXYGEN
-#define CO_MULTIPLE_OD
-#endif
-
-/**
- * If macro is defined externally, then global variables for CANopen objects
- * will be used instead of heap. This is possible only if CO_MULTIPLE_OD is not
- * defined.
- */
-#ifdef CO_DOXYGEN
-#define CO_USE_GLOBALS
-#endif
-
-
 #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
 /**
  * CANopen configuration, used with @ref CO_new()
@@ -217,8 +198,8 @@ typedef struct {
      * There must be one Emergency object in the device. */
     uint8_t CNT_EM;
     const OD_entry_t *ENTRY_H1001; /**< OD entry for @ref CO_EM_init() */
-    OD_entry_t *ENTRY_H1014; /**< OD entry for @ref CO_EM_init() */
-    OD_entry_t *ENTRY_H1015; /**< OD entry for @ref CO_EM_init() */
+    OD_entry_t *ENTRY_H1014;       /**< OD entry for @ref CO_EM_init() */
+    OD_entry_t *ENTRY_H1015;       /**< OD entry for @ref CO_EM_init() */
     /** Size of the fifo buffer, which is used for intermediate storage of
      * emergency messages. Fifo is used by emergency producer and by error
      * history (OD object 0x1003). Size is usually equal to size of array in
@@ -282,150 +263,154 @@ typedef void CO_config_t;
  */
 typedef struct {
     bool_t nodeIdUnconfigured; /**< True in un-configured LSS slave */
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     CO_config_t *config; /**< Remember the configuration parameters */
- #endif
+#endif
     /** One CAN module object, initialised by @ref CO_CANmodule_init() */
     CO_CANmodule_t *CANmodule;
     CO_CANrx_t *CANrx; /**< CAN receive message objects */
     CO_CANtx_t *CANtx; /**< CAN transmit message objects */
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t CNT_ALL_RX_MSGS; /**< Number of all CAN receive message objects. */
     uint16_t CNT_ALL_TX_MSGS; /**< Number of all CAN transmit message objects.*/
- #endif
+#endif
     /** NMT and heartbeat object, initialised by @ref CO_NMT_init() */
     CO_NMT_t *NMT;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_NMT_SLV; /**< Start index in CANrx. */
     uint16_t TX_IDX_NMT_MST; /**< Start index in CANtx. */
     uint16_t TX_IDX_HB_PROD; /**< Start index in CANtx. */
- #endif
-#if ((CO_CONFIG_HB_CONS) & CO_CONFIG_HB_CONS_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_HB_CONS)&CO_CONFIG_HB_CONS_ENABLE) || defined CO_DOXYGEN
     /** Heartbeat consumer object, initialised by @ref CO_HBconsumer_init() */
     CO_HBconsumer_t *HBcons;
     /** Object for monitored nodes, initialised by @ref CO_HBconsumer_init() */
     CO_HBconsNode_t *HBconsMonitoredNodes;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_HB_CONS; /**< Start index in CANrx. */
- #endif
 #endif
-#if ((CO_CONFIG_NODE_GUARDING) & CO_CONFIG_NODE_GUARDING_SLAVE_ENABLE) || defined CO_DOXYGEN
-    /** Node guarding slave object, initialised by @ref CO_nodeGuardingSlave_init() */
+#endif
+#if ((CO_CONFIG_NODE_GUARDING)&CO_CONFIG_NODE_GUARDING_SLAVE_ENABLE) ||        \
+    defined CO_DOXYGEN
+    /** Node guarding slave object, initialised by @ref
+     * CO_nodeGuardingSlave_init() */
     CO_nodeGuardingSlave_t *NGslave;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_NG_SLV; /**< Start index in CANrx. */
     uint16_t TX_IDX_NG_SLV; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_NODE_GUARDING) & CO_CONFIG_NODE_GUARDING_MASTER_ENABLE) || defined CO_DOXYGEN
-    /** Node guarding master object, initialised by @ref CO_nodeGuardingMaster_init() */
+#endif
+#if ((CO_CONFIG_NODE_GUARDING)&CO_CONFIG_NODE_GUARDING_MASTER_ENABLE) ||       \
+    defined CO_DOXYGEN
+    /** Node guarding master object, initialised by @ref
+     * CO_nodeGuardingMaster_init() */
     CO_nodeGuardingMaster_t *NGmaster;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_NG_MST; /**< Start index in CANrx. */
     uint16_t TX_IDX_NG_MST; /**< Start index in CANtx. */
- #endif
+#endif
 #endif
     /** Emergency object, initialised by @ref CO_EM_init() */
     CO_EM_t *em;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_EM_CONS; /**< Start index in CANrx. */
     uint16_t TX_IDX_EM_PROD; /**< Start index in CANtx. */
- #endif
-#if ((CO_CONFIG_EM) & (CO_CONFIG_EM_PRODUCER | CO_CONFIG_EM_HISTORY)) \
-    || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_EM) & (CO_CONFIG_EM_PRODUCER | CO_CONFIG_EM_HISTORY)) ||       \
+    defined CO_DOXYGEN
     /** FIFO for emergency object, initialised by @ref CO_EM_init() */
     CO_EM_fifo_t *em_fifo;
 #endif
     /** SDO server objects, initialised by @ref CO_SDOserver_init() */
     CO_SDOserver_t *SDOserver;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_SDO_SRV; /**< Start index in CANrx. */
     uint16_t TX_IDX_SDO_SRV; /**< Start index in CANtx. */
- #endif
-#if ((CO_CONFIG_SDO_CLI) & CO_CONFIG_SDO_CLI_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_SDO_CLI)&CO_CONFIG_SDO_CLI_ENABLE) || defined CO_DOXYGEN
     /** SDO client objects, initialised by @ref CO_SDOclient_init() */
     CO_SDOclient_t *SDOclient;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_SDO_CLI; /**< Start index in CANrx. */
     uint16_t TX_IDX_SDO_CLI; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_TIME) & CO_CONFIG_TIME_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_TIME)&CO_CONFIG_TIME_ENABLE) || defined CO_DOXYGEN
     /** TIME object, initialised by @ref CO_TIME_init() */
     CO_TIME_t *TIME;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_TIME; /**< Start index in CANrx. */
     uint16_t TX_IDX_TIME; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) || defined CO_DOXYGEN
     /** SYNC object, initialised by @ref CO_SYNC_init() */
     CO_SYNC_t *SYNC;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_SYNC; /**< Start index in CANrx. */
     uint16_t TX_IDX_SYNC; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) || defined CO_DOXYGEN
     /** RPDO objects, initialised by @ref CO_RPDO_init() */
     CO_RPDO_t *RPDO;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_RPDO; /**< Start index in CANrx. */
- #endif
 #endif
-#if ((CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) || defined CO_DOXYGEN
     /** TPDO objects, initialised by @ref CO_TPDO_init() */
     CO_TPDO_t *TPDO;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t TX_IDX_TPDO; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_LEDS) & CO_CONFIG_LEDS_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_LEDS)&CO_CONFIG_LEDS_ENABLE) || defined CO_DOXYGEN
     /** LEDs object, initialised by @ref CO_LEDs_init() */
     CO_LEDs_t *LEDs;
 #endif
-#if ((CO_CONFIG_GFC) & CO_CONFIG_GFC_ENABLE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_GFC)&CO_CONFIG_GFC_ENABLE) || defined CO_DOXYGEN
     /** GFC object, initialised by @ref CO_GFC_init() */
     CO_GFC_t *GFC;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_GFC; /**< Start index in CANrx. */
     uint16_t TX_IDX_GFC; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_SRDO) & CO_CONFIG_SRDO_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_SRDO)&CO_CONFIG_SRDO_ENABLE) || defined CO_DOXYGEN
     /** SRDO object, initialised by @ref CO_SRDOGuard_init(), single SRDOGuard
      * object is included inside all SRDO objects */
     CO_SRDOGuard_t *SRDOGuard;
     /** SRDO objects, initialised by @ref CO_SRDO_init() */
     CO_SRDO_t *SRDO;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_SRDO; /**< Start index in CANrx. */
     uint16_t TX_IDX_SRDO; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_LSS) & CO_CONFIG_LSS_SLAVE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) || defined CO_DOXYGEN
     /** LSS slave object, initialised by @ref CO_LSSslave_init(). */
     CO_LSSslave_t *LSSslave;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_LSS_SLV; /**< Start index in CANrx. */
     uint16_t TX_IDX_LSS_SLV; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_LSS) & CO_CONFIG_LSS_MASTER) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_MASTER) || defined CO_DOXYGEN
     /** LSS master object, initialised by @ref CO_LSSmaster_init(). */
     CO_LSSmaster_t *LSSmaster;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
     uint16_t RX_IDX_LSS_MST; /**< Start index in CANrx. */
     uint16_t TX_IDX_LSS_MST; /**< Start index in CANtx. */
- #endif
 #endif
-#if ((CO_CONFIG_GTW) & CO_CONFIG_GTW_ASCII) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_GTW)&CO_CONFIG_GTW_ASCII) || defined CO_DOXYGEN
     /** Gateway-ascii object, initialised by @ref CO_GTWA_init(). */
     CO_GTWA_t *gtwa;
- #if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
- #endif
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
 #endif
-#if ((CO_CONFIG_TRACE) & CO_CONFIG_TRACE_ENABLE) || defined CO_DOXYGEN
+#endif
+#if ((CO_CONFIG_TRACE)&CO_CONFIG_TRACE_ENABLE) || defined CO_DOXYGEN
     /** Trace object, initialised by @ref CO_trace_init(). */
     CO_trace_t *trace;
 #endif
@@ -486,7 +471,7 @@ bool_t CO_isLSSslaveEnabled(CO_t *co);
 CO_ReturnError_t CO_CANinit(CO_t *co, void *CANptr, uint16_t bitRate);
 
 
-#if ((CO_CONFIG_LSS) & CO_CONFIG_LSS_SLAVE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_LSS)&CO_CONFIG_LSS_SLAVE) || defined CO_DOXYGEN
 /**
  * Initialize CANopen LSS slave
  *
@@ -570,11 +555,8 @@ CO_ReturnError_t CO_CANopenInit(CO_t *co,
  *
  * @return CO_ERROR_NO in case of success.
  */
-CO_ReturnError_t CO_CANopenInitPDO(CO_t *co,
-                                   CO_EM_t *em,
-                                   OD_t *od,
-                                   uint8_t nodeId,
-                                   uint32_t *errInfo);
+CO_ReturnError_t CO_CANopenInitPDO(
+    CO_t *co, CO_EM_t *em, OD_t *od, uint8_t nodeId, uint32_t *errInfo);
 
 
 /**
@@ -605,7 +587,7 @@ CO_NMT_reset_cmd_t CO_process(CO_t *co,
                               uint32_t *timerNext_us);
 
 
-#if ((CO_CONFIG_SYNC) & CO_CONFIG_SYNC_ENABLE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_SYNC)&CO_CONFIG_SYNC_ENABLE) || defined CO_DOXYGEN
 /**
  * Process CANopen SYNC objects.
  *
@@ -620,13 +602,12 @@ CO_NMT_reset_cmd_t CO_process(CO_t *co,
  *
  * @return True, if CANopen SYNC message was just received or transmitted.
  */
-bool_t CO_process_SYNC(CO_t *co,
-                       uint32_t timeDifference_us,
-                       uint32_t *timerNext_us);
+bool_t
+CO_process_SYNC(CO_t *co, uint32_t timeDifference_us, uint32_t *timerNext_us);
 #endif
 
 
-#if ((CO_CONFIG_PDO) & CO_CONFIG_RPDO_ENABLE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_PDO)&CO_CONFIG_RPDO_ENABLE) || defined CO_DOXYGEN
 /**
  * Process CANopen RPDO objects.
  *
@@ -648,7 +629,7 @@ void CO_process_RPDO(CO_t *co,
 #endif
 
 
-#if ((CO_CONFIG_PDO) & CO_CONFIG_TPDO_ENABLE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_PDO)&CO_CONFIG_TPDO_ENABLE) || defined CO_DOXYGEN
 /**
  * Process CANopen TPDO objects.
  *
@@ -670,7 +651,7 @@ void CO_process_TPDO(CO_t *co,
 #endif
 
 
-#if ((CO_CONFIG_SRDO) & CO_CONFIG_SRDO_ENABLE) || defined CO_DOXYGEN
+#if ((CO_CONFIG_SRDO)&CO_CONFIG_SRDO_ENABLE) || defined CO_DOXYGEN
 /**
  * Process CANopen SRDO objects.
  *
