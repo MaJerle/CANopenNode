@@ -7,6 +7,7 @@
     "co_odinterface.h": "c",
     "co_driver.h": "c",
     "co_opt.h": "c",
-    "od.h": "c"
-}
+    "od.h": "c",
+    "crc16-ccitt.h": "c"
+  }
 }

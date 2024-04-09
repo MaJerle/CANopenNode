@@ -169,7 +169,7 @@ extern "C" {
  * @{
  */
 
-#if defined CO_MULTIPLE_OD || defined CO_DOXYGEN
+#if CO_MULTIPLE_OD || defined CO_DOXYGEN
 /**
  * CANopen configuration, used with @ref CO_new()
  *

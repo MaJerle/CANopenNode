@@ -138,7 +138,7 @@
  * defined.
  */
 #ifndef CO_USE_GLOBALS
-#define CO_USE_GLOBALS 0
+#define CO_USE_GLOBALS 1
 #endif
 
 /**

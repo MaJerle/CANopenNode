@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 project(CanOpenNode C CXX)
 
 # Now generate executable for test purposes
-if (NOT PROJECT_IS_TOP_LEVEL)
+if(NOT PROJECT_IS_TOP_LEVEL)
     add_subdirectory(canopennode)
 else()
     # More for test purposes

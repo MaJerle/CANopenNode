@@ -63,7 +63,7 @@
 #elif OD_CNT_HB_CONS < 0 || OD_CNT_HB_CONS > 1
 #error OD_CNT_HB_CONS from OD.h not correct!
 #endif
-#if ((CO_CONFIG_HB_CONS) & CO_CONFIG_HB_CONS_ENABLE) && OD_CNT_HB_CONS == 1
+#if ((CO_CONFIG_HB_CONS)&CO_CONFIG_HB_CONS_ENABLE) && OD_CNT_HB_CONS == 1
 #if OD_CNT_ARR_1016 < 1 || OD_CNT_ARR_1016 > 127
 #error OD_CNT_ARR_1016 is not defined in Object Dictionary or value is wrong!
 #endif
@@ -307,7 +307,7 @@
 
 
 /* Objects from heap **********************************************************/
-#if !CO_USE_GLOBALS
+#ifndef CO_USE_GLOBALS
 #include <stdlib.h>
 
 /* Default allocation strategy ************************************************/
@@ -341,7 +341,7 @@
         }                                                                      \
     }
 
-#if CO_MULTIPLE_OD
+#ifdef CO_MULTIPLE_OD
 #define ON_MULTI_OD(sentence) sentence
 #else
 #define ON_MULTI_OD(sentence)
@@ -364,7 +364,7 @@ CO_t *CO_new(CO_config_t *config, uint32_t *heapMemoryUsed)
      *     CNT_ALL_TX_MSGS. */
 
     do {
-#if CO_MULTIPLE_OD
+#ifdef CO_MULTIPLE_OD
         /* verify arguments */
         if (config == NULL || config->CNT_NMT > 1 || config->CNT_HB_CONS > 1 ||
             config->CNT_EM > 1 || config->CNT_SDO_SRV > 128 ||
@@ -383,7 +383,7 @@ CO_t *CO_new(CO_config_t *config, uint32_t *heapMemoryUsed)
         /* CANopen object */
         CO_alloc_break_on_fail(co, 1, sizeof(*co));
 
-#if CO_MULTIPLE_OD
+#ifdef CO_MULTIPLE_OD
         co->config = config;
 #endif
 
@@ -571,7 +571,7 @@ CO_t *CO_new(CO_config_t *config, uint32_t *heapMemoryUsed)
         }
 #endif
 
-#if CO_MULTIPLE_OD
+#ifdef CO_MULTIPLE_OD
         /* Indexes of CO_CANrx_t and CO_CANtx_t objects in CO_CANmodule_t and
          * total number of them. Indexes are sorted in a way, that objects with
          * highest priority of the CAN identifier are listed first. */
@@ -678,7 +678,7 @@ CO_t *CO_new(CO_config_t *config, uint32_t *heapMemoryUsed)
         idxTx += TX_CNT_LSS_MST;
 #endif
         co->CNT_ALL_TX_MSGS = idxTx;
-#endif /* #if CO_MULTIPLE_OD */
+#endif /* #ifdef CO_MULTIPLE_OD */
 
         /* CANmodule */
         CO_alloc_break_on_fail(co->CANmodule, 1, sizeof(*co->CANmodule));
@@ -794,7 +794,7 @@ void CO_delete(CO_t *co)
     /* CANopen object */
     CO_free(co);
 }
-#endif /* !CO_USE_GLOBALS */
+#endif /* #ifndef CO_USE_GLOBALS */
 
 
 /* Objects as globals *********************************************************/
@@ -1269,38 +1269,35 @@ CO_ReturnError_t CO_CANopenInit(CO_t *co,
 #if (CO_CONFIG_SRDO) & CO_CONFIG_SRDO_ENABLE
     if (CO_GET_CNT(SRDO) > 0) {
         err = CO_SRDOGuard_init(co->SRDOGuard,
-                                co->SDO[0],
-                                &co->NMT->operatingState,
-                                &OD_configurationValid,
-                                OD_H13FE_SRDO_VALID,
-                                OD_H13FF_SRDO_CHECKSUM);
+                                OD_GET(H13FE, OD_H13FE_SRDO_VALID),
+                                OD_GET(H13FF, OD_H13FF_SRDO_CHECKSUM),
+                                errInfo);
         if (err) {
             return err;
         }
 
         OD_entry_t *SRDOcomm = OD_GET(H1301, OD_H1301_SRDO_1_PARAM);
-        OD_entry_t *SRDOmap = OD_GET(H1318, OD_H1381_SRDO_1_MAPPING);
+        OD_entry_t *SRDOmap = OD_GET(H1381, OD_H1381_SRDO_1_MAPPING);
         for (int16_t i = 0; i < CO_GET_CNT(SRDO); i++) {
             uint16_t CANdevRxIdx = CO_GET_CO(RX_IDX_SRDO) + 2 * i;
             uint16_t CANdevTxIdx = CO_GET_CO(TX_IDX_SRDO) + 2 * i;
 
             err = CO_SRDO_init(&co->SRDO[i],
+                               i,
                                co->SRDOGuard,
+                               od,
                                em,
-                               co->SDO[0],
                                nodeId,
                                ((i == 0) ? CO_CAN_ID_SRDO_1 : 0),
                                SRDOcomm++,
                                SRDOmap++,
-                               &OD_safetyConfigurationChecksum[i],
-                               OD_H1301_SRDO_1_PARAM + i,
-                               OD_H1381_SRDO_1_MAPPING + i,
                                co->CANmodule,
                                CANdevRxIdx,
                                CANdevRxIdx + 1,
                                co->CANmodule,
                                CANdevTxIdx,
-                               CANdevTxIdx + 1);
+                               CANdevTxIdx + 1,
+                               errInfo);
             if (err) {
                 return err;
             }
@@ -1689,7 +1686,11 @@ void CO_process_SRDO(CO_t *co,
         return;
     }
 
-    uint8_t firstOperational = CO_SRDOGuard_process(co->SRDOGuard);
+    bool_t NMTisOperational =
+        CO_NMT_getInternalState(co->NMT) == CO_NMT_OPERATIONAL;
+
+    uint8_t firstOperational =
+        CO_SRDOGuard_process(co->SRDOGuard, NMTisOperational);
 
     for (int16_t i = 0; i < CO_GET_CNT(SRDO); i++) {
         CO_SRDO_process(
